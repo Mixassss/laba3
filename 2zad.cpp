@@ -231,6 +231,18 @@ int main() {
     cout << "10 Получившихся чисел:" << endl;
     for (int i : ReallyProstie) {
         cout << setw(5) << i;
+        // Добавленное условие для проверки с помощью тестов Рабина и Поклингтона
+        if (Poli(Prostie, i) && !MillerRabin(i, 10)) {
+            cout << " -"; // Если Poli верно и MillerRabin ложно
+        }
+        else {
+            cout << " +"; // В противном случае
+        }
+        cout << endl;
+    }
+    
+    for (int i : ReallyProstie) {
+        cout << setw(5) << i;
         MissedOnes = MillerRabin(i, 10);
         if (MissedOnes == 1) {
             cout << " +";
