@@ -3,60 +3,62 @@
 #include <iomanip>
 #include <numeric>
 #include <cmath>
+#include <windows.h>
 
 using namespace std;
 
-vector<double> coffee(double Tk, double Tsr, double r, int time) { // РІС‹СЃС‡РёС‚С‹РІР°РµС‚ С‚РµРјРїРµСЂР°С‚СѓСЂСѓ РєРѕС„Рµ СЃРѕ РІСЂРµРјРµРЅРµРј
-	vector<double> temperatures; // РІРµРєС‚РѕСЂ РґР»СЏ С‚РµРјРїРµСЂР°С‚СѓСЂС‹
+vector<double> coffee(double Tk, double Tsr, double r, int time) { // высчитывает температуру кофе со временем
+	vector<double> temperatures; // вектор для температуры
 	for (int i = 1; i <= time; i++) {
-		double t = Tsr + (Tk - Tsr) * exp(-r * i); // РІС‹С‡РёСЃР»РµРЅРёРµ РїРѕ Р·Р°РєРѕРЅСѓ С‚РµРїР»РѕРїСЂРѕРІРѕРґРЅРѕСЃС‚Рё РќСЊСЋС‚РѕРЅР°
+		double t = Tsr + (Tk - Tsr) * exp(-r * i); // вычисление по закону теплопроводности Ньютона
 		temperatures.push_back(t);
 	}
 	return temperatures;
 }
 
-pair<double, double> aprox(const vector<double>& x, const vector<double>& y) { // Р·РЅР°С‡РµРЅРёРµ Р°РїРїСЂРѕРєСЃРёРјРёСЂСѓСЋС‰РµР№ РїСЂСЏРјРѕР№
-	double sumx = accumulate(x.begin(), x.end(), 0.0); // СЃСѓРјРјР° РІСЃРµС… С…
-	double sumy = accumulate(y.begin(), y.end(), 0.0); // СЃСѓРјРјР° РІСЃРµС… Сѓ
-	double xy = inner_product(x.begin(), x.end(), y.begin(), 0.0); // СЃСѓРјРјР° РїСЂРѕРёР·РІРµРґРµРЅРёСЏ РІСЃРµС… С… РЅР° Сѓ
-	double xx = inner_product(x.begin(), x.end(), x.begin(), 0.0); // СЃСѓРјРјР° РІСЃРµС… С… РІ РєРІР°РґСЂР°С‚Рµ
+pair<double, double> aprox(const vector<double>& x, const vector<double>& y) { // значение аппроксимирующей прямой
+	double sumx = accumulate(x.begin(), x.end(), 0.0); // сумма всех х
+	double sumy = accumulate(y.begin(), y.end(), 0.0); // сумма всех у
+	double xy = inner_product(x.begin(), x.end(), y.begin(), 0.0); // сумма произведения всех х на у
+	double xx = inner_product(x.begin(), x.end(), x.begin(), 0.0); // сумма всех х в квадрате
 	double n = x.size();
-	pair <double, double> approximatingLine; // РїР°СЂР° Р·РЅР°С‡РµРЅРёР№ Р°РїРїСЂРѕРєСЃРёРјРёСЂСѓСЋС‰РµР№ РїСЂСЏРјРѕР№
-	approximatingLine.first = (n * xy - sumx * sumy) / (n * xx - sumx * sumx); // Р·РЅР°С‡РµРЅРёРµ Р°
-	approximatingLine.second = (sumy - approximatingLine.first * sumx) / n; // Р·РЅР°С‡РµРЅРёРµ b
+	pair <double, double> approximatingLine; // пара значений аппроксимирующей прямой
+	approximatingLine.first = (n * xy - sumx * sumy) / (n * xx - sumx * sumx); // значение а
+	approximatingLine.second = (sumy - approximatingLine.first * sumx) / n; // значение b
 	return approximatingLine;
 }
 
-double korrel(const vector<double>& x, const vector<double>& y) { // РєРѕСЌС„С„РёС†РёРµРЅС‚ РєРѕСЂСЂРµР»СЏС†РёРё
-	double xsr = accumulate(x.begin(), x.end(), 0.0) / x.size(); // СЃСЂРµРґРЅРµРµ Р·РЅР°С‡РµРЅРёРµ С…
-	double ysr = accumulate(y.begin(), y.end(), 0.0) / y.size(); // СЃСЂРµРґРЅРµРµ Р·РЅР°С‡РµРЅРёРµ Сѓ
+double korrel(const vector<double>& x, const vector<double>& y) { // коэффициент корреляции
+	double xsr = accumulate(x.begin(), x.end(), 0.0) / x.size(); // среднее значение х
+	double ysr = accumulate(y.begin(), y.end(), 0.0) / y.size(); // среднее значение у
 	double sumxy = 0, sumxx = 0, sumyy = 0;
 	for (int i = 0; i < x.size(); i++) {
-		sumxy += (x[i] - xsr) * (y[i] - ysr); // СЃСѓРјРјР° РїСЂРѕРёР·РІРµРґРµРЅРёСЏ СЂР°Р·РЅРѕСЃС‚Рё РІСЃРµС… С… Рё С… СЃСЂРµРґРЅРµРіРѕ РЅР° СЂР°Р·РЅРѕСЃС‚СЊ РІСЃРµС… Сѓ РЅР° Сѓ СЃСЂРµРґРЅРµРіРѕ
-		sumxx += (x[i] - xsr) * (x[i] - xsr); // СЃСѓРјРјР° РєРІР°РґСЂР°С‚Р° СЂР°Р·РЅРѕСЃС‚Рё РІСЃРµС… С… Рё С… СЃСЂРµРґРЅРµРіРѕ
-		sumyy += (y[i] - ysr) * (y[i] - ysr); // СЃСѓРјРјР° РєРІР°РґСЂР°С‚Р° СЂР°Р·РЅРѕСЃС‚Рё РІСЃРµС… Сѓ Рё Сѓ СЃСЂРµРґРЅРµРіРѕ
+		sumxy += (x[i] - xsr) * (y[i] - ysr); // сумма произведения разности всех х и х среднего на разность всех у на у среднего
+		sumxx += (x[i] - xsr) * (x[i] - xsr); // сумма квадрата разности всех х и х среднего
+		sumyy += (y[i] - ysr) * (y[i] - ysr); // сумма квадрата разности всех у и у среднего
 	}
-	return sumxy / sqrt(sumxx * sumyy); // РїРѕРґСЃС‡С‘С‚ РєРѕСЌС„С„РёС†РёРµРЅС‚Р°
+	return sumxy / sqrt(sumxx * sumyy); // подсчёт коэффициента
 }
 
 int main() {
-	setlocale(LC_ALL, "Russian");
-	double Tk = 90; // С‚РµРјРїРµСЂР°С‚СѓСЂР° РєРѕС„Рµ
-	double Tsr = 25; // С‚РµРјРїРµСЂР°С‚СѓСЂР° РѕРєСЂСѓР¶Р°СЋС‰РµР№ СЃСЂРµРґС‹
-	double r = 0.005; // РєРѕСЌС„С„РёС†РёРµРЅС‚ РѕСЃС‚С‹РІР°РЅРёСЏ
-	int time = 60; // РІСЂРµРјСЏ РѕСЃС‚С‹РІР°РЅРёСЏ РІ РјРёРЅСѓС‚Р°С…
-	vector<double> temperatures = coffee(Tk, Tsr, r, time); // Р·Р°РїРѕР»РЅРµРЅРёРµ РІРµРєС‚РѕСЂР° СЃ С‚РµРјРїРµСЂР°С‚СѓСЂРѕР№
-	vector<double> times; // РІРµРєС‚РѕСЂ РґР»СЏ РІСЂРµРјРµРЅРё
+	SetConsoleCP(1251);
+	SetConsoleOutputCP(1251);
+	double Tk = 90; // температура кофе
+	double Tsr = 25; // температура окружающей среды
+	double r = 0.005; // коэффициент остывания
+	int time = 60; // время остывания в минутах
+	vector<double> temperatures = coffee(Tk, Tsr, r, time); // заполнение вектора с температурой
+	vector<double> times; // вектор для времени
 	cout << "__________________________" << endl;
-	cout << "|" << setw(3) << "time (x)|" << setw(5) << "temperature (y)|" << endl; // С€Р°РїРєР° С‚Р°Р±Р»РёС†С‹ 
+	cout << "|" << setw(3) << "time (x)|" << setw(5) << "temperature (y)|" << endl; // шапка таблицы 
 	for (int i = 0, j = 1; i < temperatures.size() && j <= time; i++, j++) {
 		cout << "|" << setw(5) << j << setw(4) << "|";
-		cout << setw(9) << temperatures[i] << setw(7) << "|" << endl; // РІС‹РІРѕРґ Р·РЅР°С‡РµРЅРёР№ РІ С‚Р°Р±Р»РёС‡РЅРѕР№ С„РѕСЂРјРµ
-		times.push_back(i); // Р·Р°РїРѕР»РЅРµРЅРёРµ РІРµРєС‚РѕСЂР° СЃРѕ РІСЂРµРјРµРЅРµРј
+		cout << setw(9) << temperatures[i] << setw(7) << "|" << endl; // вывод значений в табличной форме
+		times.push_back(i); // заполнение вектора со временем
 	}
-	cout << "РђРїРїСЂРѕРєСЃРёРјРёСЂСѓСЋС‰Р°СЏ РїСЂСЏРјР°СЏ: a = ";
-	pair<double, double> approximatingLine = aprox(times, temperatures); // Р·Р°РїРѕР»РЅРµРЅРёРµ РїР°СЂС‹ СЃРѕ Р·РЅР°С‡РµРЅРёРµРј Р°РїРїСЂРѕРєСЃРёРјРёСЂСѓСЋС‰РµР№ РїСЂСЏРјРѕР№
+	cout << "Аппроксимирующая прямая: a = ";
+	pair<double, double> approximatingLine = aprox(times, temperatures); // заполнение пары со значением аппроксимирующей прямой
 	cout << approximatingLine.first << " b = " << approximatingLine.second << endl;
-	cout << "РљРѕСЌС„С„РёС†РёРµРЅС‚ РєРѕСЂСЂРµР»СЏС†РёРё: r = " << korrel(times, temperatures);
+	cout << "Коэффициент корреляции: r = " << korrel(times, temperatures);
 	return 0;
 }

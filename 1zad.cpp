@@ -1,5 +1,6 @@
 #include <iostream>
 #include <math.h>
+#include <Windows.h>
 using namespace std;
 
 void pudge(float start, float end, float step) { //
@@ -34,14 +35,15 @@ void pudge(float start, float end, float step) { //
 }
 
 int main(){
-    setlocale(LC_ALL, "Rus");
+    SetConsoleCP(1251);
+	SetConsoleOutputCP(1251);
 
     float xstart, xend, step;
-    cout << "Ð’Ð²ÐµÐ´Ð¸Ñ‚Ðµ Ð½Ð°Ñ‡Ð°Ð»ÑŒÐ½Ñ‹Ð¹ x: ";
+    cout << "Ââåäèòå íà÷àëüíûé x: ";
     cin >> xstart;
-    cout << "Ð’Ð²ÐµÐ´Ð¸Ñ‚Ðµ ÐºÐ¾Ð½ÐµÑ‡Ð½Ñ‹Ð¹ x: ";
+    cout << "Ââåäèòå êîíå÷íûé x: ";
     cin >> xend;
-    cout << "Ð’Ð²ÐµÐ´Ð¸Ñ‚Ðµ ÑˆÐ°Ð³: ";
+    cout << "Ââåäèòå øàã: ";
     cin >> step;
 
     cout << "X\t" << "Y\n";
